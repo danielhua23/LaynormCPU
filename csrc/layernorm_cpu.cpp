@@ -13,28 +13,28 @@
 // src: {rows, cols}
 void RMSnorm_fp32(float* src, float* gamma, float* dst, float ln_eps, int rows, int cols)
 {
-  int M = rows;
-  int N = cols;
-  auto len = _mm512_set1_ps((float)(N)); //把1个fp32 broadcast到1个avx512 reg
-  auto eps = _mm512_set1_ps(ln_eps);
+//   int M = rows;
+//   int N = cols;
+//   auto len = _mm512_set1_ps((float)(N)); //把1个fp32 broadcast到1个avx512 reg
+//   auto eps = _mm512_set1_ps(ln_eps);
  
-  for (int i = 0; i < M; ++i)
-  {
-    // 初始化一个为0的avx512 reg
-    for (int j = 0; j < N; j += 16)
-    {
-      //把fp16转换为fp32
-      //向量除法，dat / len
-       //fma, 即ele1 * ele1 / len
-    } // 各个向量求各自的x^2 / len, 最后累加, inter avx512 vec reg
+//   for (int i = 0; i < M; ++i)
+//   {
+//     // 初始化一个为0的avx512 reg
+//     for (int j = 0; j < N; j += 16)
+//     {
+//       //把fp16转换为fp32
+//       //向量除法，dat / len
+//        //fma, 即ele1 * ele1 / len
+//     } // 各个向量求各自的x^2 / len, 最后累加, inter avx512 vec reg
  
  
-    for (int j = 0; j < N; j += 16)
-    {
-      //分子除分母
-       //结果由res reg存储到对应offset
-    }
-  }
+//     for (int j = 0; j < N; j += 16)
+//     {
+//       //分子除分母
+//        //结果由res reg存储到对应offset
+//     }
+//   }
 }
 // src: {rows, cols}, 映射到图片的{N,C,H,W}格式的话rows = N, cols = C*H*W
 // y=(x-E(x))/sqrt(var(x)+eps) * gamma + beta
@@ -94,35 +94,14 @@ void layernorm_avx(int rows, int cols, float *src, float *gamma,
 torch::Tensor layernorm_cpu(torch::Tensor src, torch::Tensor gamma, torch::Tensor beta) {
     auto rows = src.size(0);
     auto cols = src.size(1);
+    std::cout << "rows: " << rows <<std::endl;
+    std::cout << "cols: " << cols <<std::endl;
     float ln_eps = 1e-5;
-    torch::Tensor dst = torch::empty({rows, cols});
+    torch::Tensor dst = torch::empty({rows, cols}, torch::kFloat);
     layernorm_avx(rows, cols, src.data_ptr<float>(), gamma.data_ptr<float>(), beta.data_ptr<float>(), dst.data_ptr<float>(), ln_eps);
     return dst;
 }
-// void LayNorm_main() {
-//   int rows = 100;
-//   int cols = 2048;
-//   float* src = (float*)malloc(rows * cols * sizeof(float));
-//   float* gamma = (float*)malloc(cols * sizeof(float));
-//   float* beta = (float*)malloc(cols * sizeof(float));
-//   float* dst = (float*)malloc(rows * cols * sizeof(float));
-//   float ln_eps = 1e-5;
-//   // initialize
-//   for(int i = 0; i < rows * cols; i++) {
-//     src[i] = (float)(i % 4 + 1); // 1 2 3 4 1 2 3 4...
-//     if(i < cols) {
-//       gamma[i] = (float)((i % 4 + 1) * 0.5);
-//       beta[i] = (float)((i % 4 + 1) * 0.5);
-//     }
-//   }
-//   //  call kernel
-//   layernorm_avx(rows, cols, src, gamma, beta, dst, ln_eps);
-//   std::cout << "layernorm output: " << dst[0] << std::endl;
-//   free(src);
-//   free(gamma);
-//   free(beta);
-//   free(dst);
-// }
+
 // 定义Python绑定
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("layernorm", &layernorm_cpu, "layer normalization");

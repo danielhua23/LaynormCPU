@@ -7,7 +7,8 @@ setup(
     ext_modules=[
         CppExtension(
             'my_cpu_extension',# 实际python代码import的包名: import my_cpu_extension
-            ['csrc/layernorm_cpu.cpp']
+            ['csrc/layernorm_cpu.cpp'],
+            extra_compile_args=['-march=native']
         ),
     ],
     cmdclass={
