@@ -8,6 +8,6 @@ class LayerNorm(torch.nn.Module):
         # self.beta = beta
         
     def forward(self, x: torch.Tensor, gamma: torch.Tensor, beta: torch.Tensor):
-        output = my_cpu_extension.layernorm(x, gamma, beta)[0]
+        output = my_cpu_extension.layernorm(x, gamma, beta)
         return output
     
